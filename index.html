@@ -3,36 +3,224 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sobre Secreto Interactivo</title>
-<link rel="stylesheet" href="styles.css">
+<title>Sobre Secreto</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  background: radial-gradient(#3b0410, #000);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: Georgia, serif;
+  color: white;
+  overflow: hidden;
+}
+
+h2 {
+  margin-bottom: 25px;
+  font-weight: 300;
+  opacity: 0.85;
+}
+
+/* CONTENEDOR */
+.env-wrapper {
+  position: relative;
+  width: 500px;
+  height: 280px;
+  touch-action: none;
+}
+
+/* SOBRE */
+.envelope {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, #b11226, #8c0d1d);
+  border-radius: 10px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  overflow: hidden;
+  z-index: 2;
+}
+
+/* SVG DEL CORTE */
+.tear-svg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+#tearPath {
+  fill: none;
+  stroke: #f7f5f0;
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,0.6));
+}
+
+/* CARTA */
+.letter {
+  position: absolute;
+  inset: 18px;
+  background: #f1e0c5;
+  padding: 30px;
+  color: #4a3623;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(10px) scale(0.97);
+  transition: 1s ease;
+  box-shadow:
+    inset 0 0 40px rgba(0,0,0,0.18),
+    0 5px 15px rgba(0,0,0,0.35);
+  z-index: 1;
+}
+
+.revealed .letter {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.letter h1 {
+  margin-top: 0;
+  color: #7a1c1c;
+}
+
+.highlight {
+  font-weight: bold;
+  margin-top: 14px;
+}
+
+.firma {
+  margin-top: 28px;
+  text-align: right;
+}
+
+/* DESAPARECE SOBRE */
+.finished .envelope {
+  opacity: 0;
+  transform: scale(1.05);
+  transition: 0.7s ease;
+}
+
+/* PEQUEÑA VIBRACIÓN */
+.shake {
+  animation: shake 0.05s infinite;
+}
+
+@keyframes shake {
+  0% { transform: translateX(-1px); }
+  50% { transform: translateX(1px); }
+  100% { transform: translateX(-1px); }
+}
+</style>
 </head>
 
 <body>
 
-<h2>Desliza hacia abajo para romper el sobre</h2>
+<h2>Desliza hacia abajo para abrir el sobre</h2>
 
 <div class="env-wrapper" id="env">
 
-  <!-- CARTA -->
   <div class="letter">
-    <h1>Mi Querida Persona</h1>
+    <h1>✨ Abisag ✨</h1>
+
     <p>
-      Te escribo esta carta digital porque hay sentimientos
-      que merecen descubrirse despacio.
+      Quería dejarte estas palabras como quien deja una nota con cuidado,
+      solo para recordarte algo que para mí es muy claro.
     </p>
-    <p class="highlight">Eres mi secreto favorito.</p>
-    <p class="firma">Con cariño,<br>Tu admirador</p>
+
+    <p>
+      Gracias por estar en mi vida, por cada momento compartido,
+      por las conversaciones que sanan, por las risas que alivian
+      y por esa forma tuya de acompañar, incluso cuando no hace falta decir nada.
+    </p>
+
+    <p class="highlight">
+      Tenerte cerca es un regalo sencillo pero valioso.
+      Te quiero mucho y te aprecio de verdad.
+    </p>
+
+    <p class="firma">
+      Un abrazo grande 💜
+    </p>
   </div>
 
-  <!-- SOBRE -->
   <div class="envelope">
     <svg class="tear-svg" viewBox="0 0 500 280">
-      <path id="tearPath" d="" />
+      <path id="tearPath"></path>
     </svg>
   </div>
 
 </div>
 
-<script src="script.js"></script>
+<script>
+const env = document.getElementById("env");
+const tearPath = document.getElementById("tearPath");
+
+let tearing = false;
+let points = [];
+
+env.addEventListener("mousedown", startTear);
+env.addEventListener("touchstart", startTear, { passive: false });
+
+window.addEventListener("mousemove", moveTear);
+window.addEventListener("touchmove", moveTear, { passive: false });
+
+window.addEventListener("mouseup", endTear);
+window.addEventListener("touchend", endTear);
+
+function startTear(e) {
+  tearing = true;
+  points = [];
+  env.classList.add("shake");
+}
+
+function moveTear(e) {
+  if (!tearing) return;
+
+  e.preventDefault();
+
+  const rect = env.getBoundingClientRect();
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  let y = clientY - rect.top;
+
+  y = Math.max(0, Math.min(y, 280));
+
+  const x = 250 + (Math.random() * 16 - 8);
+
+  points.push({ x, y });
+  drawPath();
+
+  if (y > 260) finishTear();
+}
+
+function endTear() {
+  tearing = false;
+  env.classList.remove("shake");
+}
+
+function finishTear() {
+  tearing = false;
+  env.classList.remove("shake");
+  env.classList.add("finished", "revealed");
+}
+
+function drawPath() {
+  if (points.length < 2) return;
+
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    d += ` L ${points[i].x} ${points[i].y}`;
+  }
+  tearPath.setAttribute("d", d);
+}
+</script>
+
 </body>
 </html>
