@@ -6,9 +6,7 @@
 <title>Sobre Secreto</title>
 
 <style>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -35,6 +33,7 @@ h2 {
   width: 500px;
   height: 280px;
   touch-action: none;
+  overflow: visible; /* CLAVE */
 }
 
 /* SOBRE */
@@ -45,10 +44,10 @@ h2 {
   border-radius: 10px;
   box-shadow: 0 20px 40px rgba(0,0,0,0.6);
   overflow: hidden;
-  z-index: 2;
+  z-index: 3;
 }
 
-/* SVG DEL CORTE */
+/* SVG CORTE */
 .tear-svg {
   position: absolute;
   inset: 0;
@@ -67,25 +66,34 @@ h2 {
 /* CARTA */
 .letter {
   position: absolute;
-  inset: 18px;
+  top: 18px;
+  left: 18px;
+  right: 18px;
+
+  height: 250px; /* crecerá dinámicamente */
+
   background: #f1e0c5;
   padding: 30px;
   color: #4a3623;
   text-align: center;
+
   opacity: 0;
-  transform: translateY(10px) scale(0.97);
-  transition: 1s ease;
+  transform: translateY(40px) scale(0.97);
+  transition: 0.8s ease;
+
   box-shadow:
     inset 0 0 40px rgba(0,0,0,0.18),
-    0 5px 15px rgba(0,0,0,0.35);
+    0 8px 20px rgba(0,0,0,0.35);
+
   z-index: 1;
 }
 
 .revealed .letter {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translateY(-10px) scale(1);
 }
 
+/* TEXTO */
 .letter h1 {
   margin-top: 0;
   color: #7a1c1c;
@@ -108,9 +116,9 @@ h2 {
   transition: 0.7s ease;
 }
 
-/* PEQUEÑA VIBRACIÓN */
+/* VIBRACIÓN */
 .shake {
-  animation: shake 0.05s infinite;
+  animation: shake 0.06s infinite;
 }
 
 @keyframes shake {
@@ -127,7 +135,7 @@ h2 {
 
 <div class="env-wrapper" id="env">
 
-  <div class="letter">
+  <div class="letter" id="letter">
     <h1>✨ Abisag ✨</h1>
 
     <p>
@@ -146,9 +154,7 @@ h2 {
       Te quiero mucho y te aprecio de verdad.
     </p>
 
-    <p class="firma">
-      Un abrazo grande 💜
-    </p>
+    <p class="firma">Un abrazo grande 💜</p>
   </div>
 
   <div class="envelope">
@@ -162,6 +168,7 @@ h2 {
 <script>
 const env = document.getElementById("env");
 const tearPath = document.getElementById("tearPath");
+const letter = document.getElementById("letter");
 
 let tearing = false;
 let points = [];
@@ -183,7 +190,6 @@ function startTear(e) {
 
 function moveTear(e) {
   if (!tearing) return;
-
   e.preventDefault();
 
   const rect = env.getBoundingClientRect();
@@ -192,10 +198,17 @@ function moveTear(e) {
 
   y = Math.max(0, Math.min(y, 280));
 
+  /* CORTE IRREGULAR */
   const x = 250 + (Math.random() * 16 - 8);
-
   points.push({ x, y });
   drawPath();
+
+  /* 🔥 CRECIMIENTO DEL PAPEL MIENTRAS RASGA */
+  const minHeight = 250;
+  const maxHeight = 420;
+  const growth = minHeight + (y / 280) * (maxHeight - minHeight);
+  letter.style.height = growth + "px";
+  letter.style.opacity = "1";
 
   if (y > 260) finishTear();
 }
@@ -224,3 +237,4 @@ function drawPath() {
 
 </body>
 </html>
+``
